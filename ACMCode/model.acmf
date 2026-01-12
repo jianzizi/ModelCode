@@ -110,6 +110,7 @@ Model GasMembrane
             Pe_RF(comp, k) = 1 / (1 / 10 + (2 * varepsilon) / (3 * Re(comp, k) * Pr(comp, k)));
             k_rf(comp, k) = G(comp, k) * c_p(comp, k) * d_p / Pe_RF(comp, k);
             h_wf(comp, k) = k_g(comp, k) / d_p * 0.24 * (Re(comp, k) ^ 0.75) * (Pr(comp, k) ^ (1 / 3));
+            
 
         EndFor
     EndFor
