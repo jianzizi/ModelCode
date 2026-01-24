@@ -2,7 +2,7 @@ Model AmmoniaDecomp
     // -----------------------------------------------------------
     // 几何参数与常数
     // -----------------------------------------------------------
-    NCells                              AS IntegerParameter     (Description: "离散单元数", 20);
+    NCells                              AS IntegerParameter     (Description: "离散单元数", 200);
     R1                                  AS length               (Description: "内管半径 (m)", fixed, 0.0029);
     R2                                  AS length               (Description: "外管半径 (m)", fixed, 0.0508);
     Rt                                  AS length               (Description: "反应区半径 (m)", fixed, 0.0479);
@@ -12,8 +12,8 @@ Model AmmoniaDecomp
     rho_b                               AS dens_mass_sol        (Description: "堆密度 (kg/m3)", fixed, 1490.0);
     eps                                 AS fraction             (Description: "空隙率", fixed, 0.404);
     eta                                 AS coefficient          (Description: "有效因子", fixed, 1.0);
-    U2                                  AS heat_trans_coeff     (Description: "反应区与渗透区总传热系数 (kJ/m2/h/K)", fixed, 8.64);
-    kp                                  AS conductivity         (Description: "颗粒导热系数 ((kJ/m/s/K))", fixed, 2.0e-3);
+    U2                                  AS heat_trans_coeff     (Description: "反应区与渗透区总传热系数 (kJ/m2/s/K)", fixed, 0.0024);
+    kp                                  AS conductivity         (Description: "颗粒导热系数 ((J/m/s/K))", fixed, 2.0);
     R_gas                               AS constant             (Description: "理想气体常数 (J/mol/K)", fixed, 8.314);
     PI                                  AS constant             (Description: "圆周率", fixed, 3.141592654);
     // WHSV                                AS constant             (Description: "空速 (mL/g/hr)", fixed, 500);
@@ -28,57 +28,55 @@ Model AmmoniaDecomp
     // -----------------------------------------------------------
 
     // 环形区变量 (Annular Zone)
-    Fa(ComponentList, [0:NCells])       AS flow_mol             (Description: "环形区组分摩尔流量 (kmol/hr)");
-    Ta([0:NCells])                      AS temperature_abs      (Description: "环形区温度 (K)");
-    Ta_C([0:NCells])                    AS temperature          (Description: "环形区温度 (C)");
-    Pa([0:NCells])                      AS pressure             (Description: "环形区压力 (bar)");
-    ya(ComponentList, [0:NCells])       AS molefraction         (Description: "环形区摩尔分率");
+    Fa(ComponentList, [0:NCells])       AS flow_mol             (Description: "环形区组分摩尔流量 (kmol/hr)",40);
+    Ta([0:NCells])                      AS temperature          (Description: "环形区温度 (C)",380);
+    Pa([0:NCells])                      AS pressure             (Description: "环形区压力 (bar)",40);
+    ya(ComponentList, [0:NCells])       AS molefraction         (Description: "环形区摩尔分率",0.3);
     Pai(ComponentList, [0:NCells])      AS pressure             (Description: "环形区分压 (bar)");
-    u_a([0:NCells])                     AS velocity             (Description: "环形区流速 (m/s)");
-    rho_f([0:NCells])                   AS dens_mass            (Description: "环形区流体密度 (kg/m3)");
-    mu_a([0:NCells])                    AS viscosity            (Description: "环形区粘度 (cP)");
+    u_a([0:NCells])                     AS velocity             (Description: "环形区流速 (m/s)",1.87);
+    rho_f([0:NCells])                   AS dens_mass            (Description: "环形区流体密度 (kg/m3)",12.79);
+    mu_a([0:NCells])                    AS viscosity            (Description: "环形区粘度 (cP)",0.020);
 
     // 渗透区变量 (Permeate Zone)
     Fp(ComponentList, [0:NCells])       AS flow_mol             (Description: "渗透区组分摩尔流量 (kmol/hr)");
-    Tp([0:NCells])                      AS temperature_abs      (Description: "渗透区温度 (K)");
-    Tp_C([0:NCells])                    AS temperature          (Description: "渗透区温度 (C)");
-    Pp([0:NCells])                      AS pressure             (Description: "渗透区压力 (bar)");
+    Tp([0:NCells])                      AS temperature          (Description: "渗透区温度 (C)",380);
+    Pp                                  AS pressure             (Description: "渗透区压力 (bar)",5);
     yp(ComponentList, [0:NCells])       AS molefraction         (Description: "渗透区摩尔分率");
     Ppi(ComponentList, [0:NCells])      AS pressure             (Description: "渗透区分压 (bar)");
 
     // 反应与渗透物理量
-    r_rxn([0:NCells])                   AS notype               (Description: "氨分解速率 (kmol/kg/s)");
-    ri(ComponentList, [0:NCells])       AS notype               (Description: "各组分反应速率 (kmol/kg/s)");
-    JH2([0:NCells])                     AS flux_mol             (Description: "氢气渗透通量 (kmol/m2/s)");
-    BH([0:NCells])                      AS notype               (Description: "渗透率 (mol/s/m/Pa^0.5)");
-    Keq([0:NCells])                     AS notype               (Description: "反应平衡常数");
-    kj([0:NCells])                      AS notype               (Description: "速率常数");
+    r_rxn([0:NCells])                   AS notype               (Description: "氨分解速率 (kmol/kg/s)",0);
+    ri(ComponentList, [0:NCells])       AS notype               (Description: "各组分反应速率 (kmol/kg/s)",0);
+    JH2([0:NCells])                     AS flux_mol             (Description: "氢气渗透通量 (kmol/m2/s)",0);
+    BH([0:NCells])                      AS notype               (Description: "渗透率 (mol/s/m/Pa^0.5)",1.2e-8);
+    Keq([0:NCells])                     AS notype               (Description: "反应平衡常数",3222.67);
+    kj([0:NCells])                      AS notype               (Description: "速率常数(kmol/kg/s)",0.000011);
     deltaH([0:NCells])                  AS notype               (Description: "反应热 (kJ/kmol)");
-    G([0:NCells])                       AS notype               (Description: "表观质量流量 (kg/m2/s)");
+    G([0:NCells])                       AS notype               (Description: "表观质量流量 (kg/m2/s)",23.9);
 
     // 传热相关
-    U1([0:NCells])                      AS heat_trans_coeff     (Description: "总传热系数 (kJ/m2/h/K)");
-    hw([0:NCells])                      AS heat_trans_coeff     (Description: "壁面传热系数 (kJ/m2/s/K)");
-    hfs([0:NCells])                     AS heat_trans_coeff     (Description: "流体-固体传热系数 (kJ/m2/s/K)");
-    hfw([0:NCells])                     AS heat_trans_coeff     (Description: "流体-壁面传热系数 (kJ/m2/s/K)");
-    kg([0:NCells])                      AS conductivity         (Description: "流体热导率 (J/m/s/K)");
-    kr([0:NCells])                      AS conductivity         (Description: "有效径向导热系数 (kJ/m/s/K)");
-    krf([0:NCells])                     AS conductivity         (Description: "流体的径向导热率 (kJ/m/s/K)");
-    krs([0:NCells])                     AS conductivity         (Description: "固体的径向导热率 (kJ/m/s/K)");
-    BI([0:NCells])                      AS positive             (Description: "表观毕渥数");
-    Re([0:NCells])                      AS positive             (Description: "雷诺数");
-    Pr([0:NCells])                      AS positive             (Description: "普朗特数");
-    PeRF([0:NCells])                    AS positive             (Description: "Peclet数");
-    Tw([0:NCells])                      AS temperature_abs      (Description: "壁面温度 (K)", fixed, 703.15);
+    U1([0:NCells])                      AS heat_trans_coeff     (Description: "总传热系数 (kJ/m2/s/K)",1.447);
+    hw([0:NCells])                      AS heat_trans_coeff     (Description: "壁面传热系数 (kJ/m2/s/K)",1.9867);
+    hfs([0:NCells])                     AS heat_trans_coeff     (Description: "流体-固体传热系数 (kJ/m2/s/K)",2.7176);
+    hfw([0:NCells])                     AS heat_trans_coeff     (Description: "流体-壁面传热系数 (kJ/m2/s/K)",2.2589);
+    kg([0:NCells])                      AS conductivity         (Description: "流体热导率 (J/m/s/K)",0.0997);
+    kr([0:NCells])                      AS conductivity         (Description: "有效径向导热系数 (J/m/s/K)",69.18);
+    krf([0:NCells])                     AS conductivity         (Description: "流体的径向导热率 (J/m/s/K)",68.6);
+    krs([0:NCells])                     AS conductivity         (Description: "固体的径向导热率 (J/m/s/K)",0.468);
+    BI([0:NCells])                      AS positive             (Description: "表观毕渥数",1.3756);
+    Re([0:NCells])                      AS positive             (Description: "雷诺数",11909);
+    Pr([0:NCells])                      AS positive             (Description: "普朗特数",0.58);
+    PeRF([0:NCells])                    AS positive             (Description: "Peclet数",10);
+    Tw([0:NCells])                      AS temperature          (Description: "壁面温度 (C)", fixed, 430);
 
     // 物性变量
     ha(ComponentList, [0:NCells])       AS enth_mol             (Description: "环形区比焓 (GJ/kmol)");
     hp(ComponentList, [0:NCells])       AS enth_mol             (Description: "渗透区比焓 (GJ/kmol)");
     Cpa([0:NCells])                     AS cp_mol               (Description: "环形区混合物摩尔比热 (kJ/kmol/K)");
     Cpa_i(ComponentList, [0:NCells])    AS cp_mol               (Description: "环形区组分摩尔比热 (kJ/kmol/K)");
-    Cpp(ComponentList, [0:NCells])      AS cp_mol               (Description: "渗透区混合物摩尔比热 (kJ/kmol/K)");
+    Cpp([0:NCells])                     AS cp_mol               (Description: "渗透区混合物摩尔比热 (kJ/kmol/K)");
     Cpp_i(ComponentList, [0:NCells])    AS cp_mol               (Description: "渗透区组分摩尔比热 (kJ/kmol/K)");
-    Mmix([0:NCells])                    AS mole_mass            (Description: "混合物相对分子质量 (g/mol)");
+    Mmix([0:NCells])                    AS mole_mass            (Description: "混合物相对分子质量 (g/mol)",17.03);
 
     // 输入与输出
     Inlet                               AS Input  molefractionport;
@@ -99,16 +97,22 @@ Model AmmoniaDecomp
 
     dz    : L / NCells;                        // Eq.0
     B     : 1.25 * ((1 - eps) / eps)^(10/9);   // Eq.16
+    //JH2   = 0;
 
     // 输入与输出
     Pa(0) = Inlet.p;
     Ta(0) = Inlet.T;
 
-    Pp(0) = Sweep.p;
+    Pp    = Sweep.p;
     Tp(0) = Sweep.T;
 
     Annular.F  = sigma(ForEach (compo in ComponentList) Fa(compo, NCells));
     Permeate.F = sigma(ForEach (compo in ComponentList) Fp(compo, NCells));
+    Annular.T  = Ta(NCells);
+    Permeate.T = Ta(NCells);
+    Annular.P  = Pa(NCells);
+    Permeate.P = Pa(NCells);
+    
     For comp in ComponentList Do
         ya(comp, 0)      = Inlet.z(comp);
         yp(comp, 0)      = Sweep.z(comp);
@@ -121,51 +125,51 @@ Model AmmoniaDecomp
     // -----------------------------------------------------------
     // 方程构建
     // -----------------------------------------------------------
+    G(0) = rho_f(0) * u_a(0);   // Eq.26
+    sigma(Fa(ComponentList, 0)) = PI * G(0) * 3600 * (R2^2 - R1^2) / 17.03;
+    Call (mu_a(0))  = pVisc_Vap     (Ta(0), Pa(0), ya(ComponentList, 0));
+    Call (rho_f(0)) = pDens_Mass_Vap(Ta(0), Pa(0), ya(ComponentList, 0));
 
     For k in [0:NCells] Do
         // 相对分子质量
         Mmix(k) = sigma(ForEach (compo in ComponentList) Mi(compo) * ya(compo, k));
-
-        G(k) = rho_f(k) * u_a(k);   // Eq.26
-        // Eq.25
-        // 1 kg/m2/s = 3600 kg/m2/hr
-        sigma(Fa(ComponentList, k)) = PI * G(k) * 3600 * (R2^2 - R1^2) / Mmix(k);
-
-        // 温度
-        Ta_C(k) = Ta(k) - 273.15;
-        Tp_C(k) = Tp(k) - 273.15;
-
-        Call (mu_a(k))  = pVisc_Vap     (Ta_C(k), Pa(k), ya(ComponentList, k));
-        Call (rho_f(k)) = pDens_Mass_Vap(Ta_C(k), Pa(k), ya(ComponentList, k));
+        
+        
     EndFor
 
     For k in [1:NCells] Do
-        // 物性计算
-        Call (kg(k))    = pCond_Vap     (Ta_C(k), Pa(k), ya(ComponentList, k));
-        Call (Cpa(k))   = pCp_Mol_Vap   (Ta_C(k), Pa(k), ya(ComponentList, k));
-
-        For comp in ComponentList Do
-            Call (Cpa_i(comp, k)) = pCp_Mol_Vap  (Ta_C(k), Pa(k), z(comp));
-            Call (Cpp_i(comp, k)) = pCp_Mol_Vap  (Tp_C(k), Pp(k), z(comp));
-            Call (ha(comp, k))    = pEnth_Mol_Vap(Ta_C(k), Pa(k), z(comp));
-            Call (hp(comp, k))    = pEnth_Mol_Vap(Tp_C(k), Pp(k), z(comp));
-        EndFor
-
         // 分压与摩尔分率 (Eq.28-31)
         For comp in ComponentList Do
             ya(comp, k)  = Fa(comp, k) / sigma(Fa(ComponentList, k));
             yp(comp, k)  = Fp(comp, k) / sigma(Fp(ComponentList, k));
             Pai(comp, k) = ya(comp, k) * Pa(k);
-            Ppi(comp, k) = yp(comp, k) * Pp(k);
+            Ppi(comp, k) = yp(comp, k) * Pp;
         EndFor
 
+        // 物性计算
+        Call (kg(k))    = pCond_Vap     (Ta(k), Pa(k), ya(ComponentList, k));
+        Call (Cpa(k))   = pCp_Mol_Vap   (Ta(k), Pa(k), ya(ComponentList, k));
+        For comp in ComponentList Do
+            Call (Cpa_i(comp, k)) = pCp_Mol_Vap  (Ta(k), Pa(k), z(comp));
+            Call (Cpp_i(comp, k)) = pCp_Mol_Vap  (Tp(k), Pp   , z(comp));
+            Call (ha(comp, k))    = pEnth_Mol_Vap(Ta(k), Pa(k), z(comp));
+            Call (hp(comp, k))    = pEnth_Mol_Vap(Tp(k), Pp   , z(comp));
+        EndFor
+        Call (mu_a(k))  = pVisc_Vap     (Ta(k), Pa(k), ya(ComponentList, k));
+        Call (rho_f(k)) = pDens_Mass_Vap(Ta(k), Pa(k), ya(ComponentList, k));
+
+        G(k) = rho_f(k) * u_a(k);   // Eq.26
+        // Eq.25
+        // 1 kg/m2/s = 3600 kg/m2/hr
+        sigma(Fa(ComponentList, k)) = PI * G(k) * 3600 * (R2^2 - R1^2) / 17.03;
+
         // 反应动力学
-        kj(k)  = 8584.8 * EXP(-1.11e5 / (R_gas * Ta(k))); // Eq.10
-        Keq(k) = EXP(-(95117 - 193.67 * Ta(k) - 0.035293 * Ta(k)^2 + 9.22e-6 * Ta(k)^3) / (R_gas * Ta(k))); // Eq.11
+        kj(k)  = 8584.8 * EXP(-111 * 1e3 / (R_gas * (Ta(k) + 273.15))); // Eq.10
+        Keq(k) = EXP(-(95117 - 193.67 * (Ta(k) + 273.15) - 0.035293 * (Ta(k) + 273.15)^2 + 9.22e-6 * (Ta(k) + 273.15)^3) / (R_gas * (Ta(k) + 273.15))); // Eq.11
 
         // 氨气分解速率 Eq.3
         // 增加极小值防止分压为 0 时计算崩溃
-        r_rxn(k) = kj(k) * (Pai("NH3", k) + 1e-9)^0.5 * (Pai("H2", k) + 1e-9)^(-1.2) * (1 - (1 / Keq(k)) * (Pai("N2", k) * Pai("H2", k)^3 / Pai("NH3", k)^2));
+        r_rxn(k) = kj(k) * (Pai("NH3", k) + 1e-9)^0.5 * (Pai("H2", k) + 1e-6)^(-1.2) * (1 - (1 / Keq(k)) * (Pai("N2", k) * Pai("H2", k)^3 / Pai("NH3", k)^2));
 
         // 组分速率 Eq.2
         ri("H2", k)  =  1.5 * r_rxn(k);
@@ -175,9 +179,9 @@ Model AmmoniaDecomp
         // 氢气渗透 Eq.5, 6
         // 1 bar = 1e5 Pa
         JH2(k) = BH(k) / delta * ((Pai("H2", k) * 1e5)^0.5 - (Ppi("H2", k) * 1e5)^0.5) * 1e-3;  // Eq.5; 1 kmol/m2/s = 1e3 mol/m2/s
-        BH(k)  = 1.09e-7 * EXP(-1438.0 / Ta(k));
+        BH(k)  = 1.09e-7 * EXP(-1438.0 / (Ta(k) + 273.15));
 
-        // 物质平衡 Eq.1, 4
+        // 物质平衡 q.1, 4
         For comp in ComponentList Do
             If comp == "H2" Then
                 (Fa(comp, k) - Fa(comp, k - 1)) / dz = (eta * ri(comp, k) * rho_b * PI * (R2^2 - R1^2) - 2 * PI * R1 * JH2(k)) * 3600;  // Eq.1; 1 kmol/hr = 3600 kmol/s
@@ -191,20 +195,23 @@ Model AmmoniaDecomp
         // 能量平衡 Eq.7, 8
         // 环形区能量平衡 Eq.7
         sigma(Foreach (compo in ComponentList) Fa(compo, k) * Cpa_i(compo, k)) * (Ta(k) - Ta(k - 1)) / dz =
-            2 * PI * (R2 * U1(k) * (Tw(k) - Ta(k)) - R1 * U2 * (Ta(k) - Tp(k))) +
+            2 * PI * 3600 * (R2 * U1(k) * (Tw(k) - Ta(k)) - R1 * U2 * (Ta(k) - Tp(k))) +
             PI * (R2^2 - R1^2) * rho_b * eta * r_rxn(k) * (-deltaH(k)) * 3600;
+        
         
         // 渗透区能量平衡 Eq.8
         // ACM 中 ha 的单位是 GJ/kmol，需要乘以 1e6 换算为 kJ/kmol 以匹配 deltaH 和 Cp
         (Fp("H2", k) * Cpp_i("H2", k) + Fp("N2", k) * Cpp_i("N2", k)) * (Tp(k) - Tp(k - 1)) / dz =
-            2 * PI * R1 * (U2 * (Ta(k) - Tp(k)) - JH2(k) * (hp("H2", k) - ha("H2", k)) * 1e6);
-
+            2 * PI * R1 * 3600 * (U2 * (Ta(k) - Tp(k)) - JH2(k) * (hp("H2", k) - ha("H2", k)) * 1e6);
+        
+        
         // 压降方程 Eq.9
         // mu_a: 1cP = 1e-3 kg/m/s
-        // 1 kg/m2/s2 = 1e-5 bar/m
-        -(Pa(k) - Pa(k - 1)) / dz = 150 * (1 - eps)^2 / eps^3 * (mu_a(k)*1e-3 * u_a(k) / dp^2) +
+        // 1 kg/m/s2 = 1e-5 bar = 1 pa
+        -(Pa(k) - Pa(k - 1)) / dz = 150 * (1 - eps)^2 / eps^3 * (mu_a(k) * 1e-3 * u_a(k) / dp^2) * 1e-5 +
                                     1.75 * (1 - eps) / eps^3 * u_a(k)^2 * rho_f(k) / dp * 1e-5;
-        Pp(k) = Pp(k - 1);
+        
+        
 
         // 传热相关关联式
         Re(k) = G(k) * dp / (mu_a(k) * 1e-3);  // Eq.19
@@ -214,24 +221,25 @@ Model AmmoniaDecomp
         1 / PeRF(k) = 1/10 + 2 * eps / (3 * Re(k) * Pr(k));
 
         // 流体径向导热率 Eq.17
-        krf(k) = G(k) * Cpa(k) * dp / (Mmix(k) * PeRF(k));
+        // J/m/s/K
+        krf(k) = G(k) * 1e3 * Cpa(k) * dp / (Mmix(k) * PeRF(k));
 
         // 固体径向导热率 Eq.15
-        // 1 kJ/m/s/K = 1e3 J/m/s/K
-        krs(k) = kg(k) * 1e-3 * Sqrt(1 - eps) * 2 / (1 - 1e-3 * kg(k) * B / kp) *
-                ((1 - 1e-3 * kg(k) / kp) * B / ((1 - 1e-3 * kg(k) * B / kp)^2) * LogE(kp / (1e-3 * kg(k) * B)) - (B + 1) / 2 - (B - 1) / (1 - 1e-3 * kg(k) * B / kp));
+        // J/m/s/K
+        krs(k) = kg(k) * Sqrt(1 - eps) * 2 / (1 - kg(k) * B / kp) *
+                ((1 - kg(k) / kp) * B / ((1 - kg(k) * B / kp)^2) * LogE(kp / (kg(k) * B)) - (B + 1) / 2 - (B - 1) / (1 - kg(k) * B / kp));
         
         // 有效径向导热系数 Eq.14
         kr(k) = krf(k) + krs(k) *
-                ((1 + 8 * krf(k) / (2 * hfw(k) * Rt)) / (1 + (16/3 * krs(k) * (1 / (hfs(k) * dp) + 0.1 / kp) / ((1 - eps) * (2 * Rt / dp)^2))));
+                ((1 + 8 * krf(k) / (2 * 1e3 * hfw(k) * Rt)) / (1 + (16/3 * krs(k) * (1 / (1e3 * hfs(k) * dp) + 0.1 / kp) / ((1 - eps) * (2 * Rt / dp)^2))));
 
         // 表观毕渥数与壁面传热系数 Eq.13
         BI(k) = 3.0 * Re(k)^(-0.25) * Rt / dp;
-        hw(k) = BI(k) * kr(k) / Rt;
+        hw(k) = BI(k) * 1e-3 * kr(k) / Rt;
 
         // 总传热系数 Eq.12
         // 1 kJ/m2/h/k = 1000/3600 J/m2/s/K; 1kJ/m2/s/K = 1e3 J/m2/s/K
-        1 / (U1(k) / 3600) = 1 / (hw(k)) + Rt / (3 * kr(k)) * (BI(k) + 3) / (BI(k) + 4);
+        1 / (U1(k)) = 1 / (hw(k)) + Rt / (3 * 1e-3 * kr(k)) * (BI(k) + 3) / (BI(k) + 4);
 
         // 努塞尔数计算等式 Eq.21
         hfw(k) * dp / (1e-3 * kg(k)) = 0.24 * Pr(k)^(1/3) * Re(k)^0.75;
@@ -240,4 +248,5 @@ Model AmmoniaDecomp
         // 1 GJ/kmol = 1e6 kJ/kmol
         deltaH(k) = (3 * ha("H2", k) + ha("N2", k) - 2 * ha("NH3", k)) * 1e6;    // Eq.27
     EndFor
+
 End
